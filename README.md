@@ -46,7 +46,7 @@
    - to any directory of your choosing
    - on any drive
 3. run the shell script that is appropriate for your host operating system:
-   - on Windows: [`WindowsLevinux.vbs`](./WindowsLevinux.vbs)
+   - on Windows: [`WindowsLevinux.bat`](./WindowsLevinux.bat)
    - on Linux: [`LinuxLevinux.sh`](./LinuxLevinux.sh)
    - on Mac OSX: double-click `Levinux`
      * or run: [`qemuonmac.sh`](./Levinux.app/Contents/Resources/qemuonmac.sh)

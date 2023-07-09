@@ -1,4 +1,4 @@
-cd ..\Levinux.app\Contents\MacOS\
+cd /D "%~dp0..\Levinux.app\Contents\MacOS"
 move home.qcow ..\..\..\Reset\home-backup.qcow
 del opt.qcow
 del tce.qcow

@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 set +e
-cd ../Levinux.app/Contents/MacOS
+cd "${DIR}/../Levinux.app/Contents/MacOS"
 mv ./home.qcow ../../../Reset/home-backup.qcow
 rm ./opt.qcow
 rm ./tce.qcow

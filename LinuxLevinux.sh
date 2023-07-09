@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if command -v resize >/dev/null; then
 	resize -s 25 80 >/dev/null
@@ -6,7 +8,7 @@ else
 	echo "Resize is not installed.  Levinux is best used in a 25x80 terminal." 2>&1
 fi
 
-cd ./Levinux.app/Contents/MacOS/
+cd "${DIR}/Levinux.app/Contents/MacOS"
 
 ./qemu-system-i386 -curses \
 -kernel vmlinuz \

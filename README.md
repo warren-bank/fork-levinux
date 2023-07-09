@@ -1,97 +1,224 @@
-# Levinux - A Micro Linux for Education
-<a href="http://mikelev.in/ux/"><img src="http://levinux.com/micro-linux-education.png" alt="Micro Linux for Education" /></a>
+### Levinux - Extensible Micro Linux Emulator
 
-## What Is This Project About?
+#### Components
 
-The [micro Linux distribution](http://mikelev.in/ux/) known as Levinux
-(download ~20 MB) is a tiny virtual Linux server that runs from USB or Dropbox
-with a double-click (no install or admin rights required) on Macs, Windows or
-Linux PCs—making it the perfect learning environment and launching-off point
-for other projects, requiring just enough operating system and a quick
-introduction to generic nix systems. Levinux is the remix of QEMU and Tiny Core
-Linux into something perfect for nix newbs. This is perhaps the only place on
-the Internet someone will recommend to actually try this just to have the
-experience (***but only on Levinux / not on your HOST system!***):
+* [QEMU PC emulator](https://www.qemu.org/) version 0.12.5 (32-bit)
+* [Tiny Core Linux](http://tinycorelinux.net/) version 7.2
+  - [TCZ extensions](http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/)
 
-    sudo rm -rf /
+#### Features
 
-## Who is Mike Levin?
+* micro
+  - 17.5 MB zip file
+  - 28.5 MB unpacked size on disk
+* portable
+  - runs from USB or _Dropbox_
+  - no admin rights are required
+  - includes _QEMU_ binaries for: Linux, MacOS, Windows
 
-Hello World! I'm Mike Levin, an SEO in New York City. I'm an Amiga Computer fan
-from long ago, with a once bitten, twice shy mentality towards Tech. That's
-made me seek out the most timeless, while still love-worthy, fundamentals worth
-learning, and the answer is Unix-like platforms through terminals. That
-realization made me research the ultimately portable platform, found none, and
-so had to make my own -- albeit something of a remix and a hack. So, I made
-Levinux as a side-project, and was surprised to discover it's wide-spread
-appeal, because at some point in everyone's technical career they research
-lightweight portable virtual machines that don't require admin rights and runs
-on a diversity of host computers types. Please read on, but feel free to learn
-more about me:
+#### Default Configuration
 
-- [Subscribe to my YouTube Channel](https://www.youtube.com/mikelevin)
-- [Follow me on Twitter](https://twitter.com/miklevin)
-- [Connect on LinkedIn](https://www.linkedin.com/in/miklevin)
-- [My SEO Daily Work Journal](http://mikelevinseo.com)
-- [My WordPress Site](http://mikelev.in/)
+* users:
+  - `tc:foo`
+* TCZ extensions:
+  - [dropbear](https://github.com/mkj/dropbear) SSH server
+    * port in guest: `22`
+    * port on host: `2222`
+    * command to connect with ssh client on host:
+      ```bash
+        ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 tc@localhost -p 2222
+        # password: foo
+      ```
+  - [busybox-httpd](https://oldwiki.archive.openwrt.org/doc/howto/http.httpd) HTTP server
+    * port in guest: `80`
+    * port on host: `8080`
+    * URL to browse the hosted website:
+      ```text
+        http://localhost:8080/
+      ```
 
---------------------------------------------------------------------------------
-## An Appeal To The Github Community
-The main limiting factor in this project is my inability to make the perfect
-QEMU binary for use with Tiny Core Linux for each platform (Windows, Mac and
-GNOME/Unity). I'm currently using the smallest and most highly compatible and
-widely distributed versions pointed to by qemu.org, but they are becoming
-forever more brittle as OSes evolve. The QEMU binaries need a fresh compile
-from a talented and trusted source each platform who knows how to bake-in
-dependencies like the curses library (but not SDL). There's also a pruning job
-down to just what's necessary to get the non-graphics version of core.gz, so I
-suspect it will take a lot of qemu config file customizations. I've seen the
-binaries as small as 1MB on older versions of QEMU, but modern compiles seem to
-come in arount 60MB. Times 3 platforms, and the "keep it small" tennant of
-Levinux goes away. So, anyone up to the challenge? 
+#### Usage
 
-- Selecting the right QEMU version and patches code-base on each platform to
-  start with.
-- Trim the qemu configuration file down to the bare minimum to support the
-  also-minimal vimlinuz Linux kernel distributed with Tiny Core Linux.
-- Rounding up all the dependencies to support text-only mode (curses, ncurses,
-  pdcurses, etc.) and static compile them into the qemu binary.
-- Help with testing on the current and last few versions of each OS.
+1. download a snapshot of the github repo
+   - the [`upstream` branch](https://github.com/warren-bank/fork-levinux/archive/refs/heads/upstream.zip) hasn't been modified from the original (commit: [3250f3](https://github.com/miklevin/levinux/tree/3250f3dd282166ff22b919d30308751f5671d248))
+   - the [`mainline` branch](https://github.com/warren-bank/fork-levinux/archive/refs/heads/mainline.zip) includes minor changes, and serves as the foundation for my personal customizations
+2. unzip
+   - to any directory of your choosing
+   - on any drive
+3. run the shell script that is appropriate for your host operating system:
+   - on Windows: [`WindowsLevinux.vbs`](./WindowsLevinux.vbs)
+   - on Linux: [`LinuxLevinux.sh`](./LinuxLevinux.sh)
+   - on Mac OSX: double-click `Levinux`
+     * or run: [`qemuonmac.sh`](./Levinux.app/Contents/Resources/qemuonmac.sh)
 
-# Installation Instructions
+#### OS-specific behavior
 
-Download the zip, unarchive it and...
+* on Windows:
+  - a prompt may ask permission to run the app and unblock the firewall
+* on Linux, Ubuntu 14.04 Nautilus:
+  - Edit &gt; Preferences &gt; Behavior &gt; Executable Text Files &gt; "Ask Each Time"
+* on Mac OSX:
+  - may require you to right-click or Control-click and open
 
-1. If on Windows, double-click WindowsLevinux.vbs.
-2. If on Mac OSX, double-click Levinux.
-3. If on Linux, double-click LinuxLevinux.sh and select Run in Terminal.
+#### Factory Reset
 
-## Machine-specific issues
+1. run the shell script that is appropriate for your host operating system:
+   - on Windows: [`ResetFromWindows.bat`](./Reset/ResetFromWindows.bat)
+   - on Linux: [`ResetFromLinux.sh`](./Reset/ResetFromLinux.sh)
+   - on Mac OSX: double-click `ResetFromMac`
+     * or run: [`ResetFromMac.sh`](./Reset/ResetFromMac.app/Contents/Resources/ResetFromMac.sh)
 
-1. Windows may prompt you to allow it to run and unblock firewall.
-2. Mac OS X may require you to right-click or Control-click and open.
-3. Ubuntu 14.04 Nautilus / Edit / Preferences / Behavior / Executable Text
-   Files, "Select Ask Each Time"
+- - - -
 
-## Including additional packages
+#### Design
 
-Inclusion of additional packages is simple, but requires a few steps be taken to optimize and set up.
+* virtual filesystem
+  - [`home.qcow`](./Levinux.app/Contents/MacOS/home.qcow)
+    * mount points:
+      - `/mnt/sda1`
+      - `/home`
+  - [`opt.qcow`](./Levinux.app/Contents/MacOS/opt.qcow)
+    * mount points:
+      - `/mnt/sdb1`
+      - `/opt`
+  - [`tce.qcow`](./Levinux.app/Contents/MacOS/tce.qcow)
+    * mount points:
+      - `/mnt/sdc1`
+  - tree:
+    ```text
+      /mnt/
+      |-- sda1/
+      |   `-- home/
+      |       `-- tc/
+      |           |-- Python3.sh
+      |           |-- Recipe.sh
+      |           |-- drinkme.sh
+      |           `-- htdocs/
+      |               |-- favicon.ico
+      |               |-- index.html
+      |               `-- style.css
+      |-- sdb1/
+      |   `-- opt/
+      |       |-- bootlocal.sh
+      |       |-- bootsync.sh
+      |       |-- shutdown.sh
+      |       `-- tcemirror
+      `-- sdc1/
+          `-- tce/
+              |-- mydata.tgz
+              |-- onboot.lst
+              |-- ondemand/
+              `-- optional/
+                  |-- busybox-httpd.tcz
+                  |-- busybox-httpd.tcz.md5.txt
+                  |-- dropbear.tcz
+                  `-- dropbear.tcz.md5.txt
+    ```
+* script: `/opt/bootsync.sh`
+  - code:
+    ```bash
+      #!/bin/sh
+      /usr/bin/sethostname box
+      sleep 2
+      if [ ! -f /home/tc/Recipe.sh ]; then
+        until tftp -g -l /home/tc/Recip.sh -r /Recipe.sh 10.0.2.2
+        do
+          sleep 2;
+        done
+        tr -d '\r' </home/tc/Recip.sh >/home/tc/Recipe.sh
+        rm /home/tc/Recip.sh
+        sh /home/tc/Recipe.sh
+      fi
+      /opt/bootlocal.sh &
+    ```
+  - purpose:
+    * the `if/then` block is executed:
+      - the first time Levinux is started after its install
+      - the first time Levinux is started after a factory reset
+    * it copies the `Recipe.sh` script to the virtual filesystem, and runs it
+* script: [`/home/tc/Recipe.sh`](./Reset/Server/Recipe.sh)
+  - purpose:
+    * installs the required TCZ extensions
+      - copies the following files to the virtual directory path: `/mnt/sdc1/tce/optional`
+        * [`dropbear.tcz`](./Reset/Server/Ingredients/dropbear.tcz)
+        * [`busybox-httpd.tcz`](./Reset/Server/Ingredients/busybox-httpd.tcz)
+      - appends each of these filenames to the list: `/mnt/sdc1/tce/onboot.lst`
+        * which causes them to be automatically loaded every time Levinux reboots
+    * copies files for the required TCZ extensions
+      - private encryption key for the SSH server (in both RSA and DSS formats)
+    * copies files that pertain to the Levinux mission
+      - static HTML files for the webserver
+      - bash scripts that are intended for users to execute
+      - verbose welcome messages
+    * prepares for the installation of optional TCZ extensions
+      - copies the following files to the virtual directory path: `/home/tc/.extras`
+        * [`extras.lst`](./Reset/Server/Ingredients/extras.lst)
+        * [`install_extras.sh`](./Reset/Server/Ingredients/install_extras.sh)
+    * runs `install_extras.sh`
+      - notes:
+        * optional TCZ extensions are __NOT__ automatically loaded every time Levinux reboots
+        * `install_extras.sh` does __NOT__ append each of these filenames to the list: `/mnt/sdc1/tce/onboot.lst`
+        * the script: `/home/tc/.extras/install_extras.sh`
+          - currently needs to be executed manually by the user after subsequent reboots
+          - could be appended to the file: `/opt/bootlocal.sh`
+            * this would run the script every time Levinux reboots
+            * but, this would be inefficient and unnecessarily overwrite the optional TCZ extensions before loading them
+            * although, a simple pre-check for file existence would fix that
+            * and, it would continue to allow for..
+              - additional TCZ extensions to be added at any time,<br>
+                by editing the virtual filepath: `/home/tc/.extras/extras.lst`
+              - subset groups of TCZ extensions to be stored as separate lists,<br>
+                and any particular list to be made primary at runtime,<br>
+                either by renaming or symbolically relinking
+    * appends commands that need to run every time Levinux reboots to the file: `/opt/bootlocal.sh`
+      - code:
+        ```bash
+          /etc/init.d/dropbear start
+          /usr/local/httpd/sbin/httpd -p 80 -h /home/tc/htdocs -u tc:staff
+        ```
+      - notes:
+        * `/opt/bootlocal.sh` is called by `/opt/bootsync.sh`,<br>
+          immediately after `Recipe.sh` is conditionally initialized
+    * adds the user: `tc`
+      - sets its password to: `foo`
+      - updates the file: `/opt/.filetool.lst`
+        * appends the following virtual filepaths:
+          - `/etc/passwd`
+          - `/etc/shadow`
+        * this causes the new user to persist across reboots
+    * calls: `filetool.sh -b`
+      - this calls [a feature](https://www.brianlinkletter.com/2014/02/persistent-configuration-changes-in-tinycore-linux/) of _Tiny Core Linux_
+      - all files specified by `/opt/.filetool.lst` are backed up to the file: `/mnt/sdc1/tce/mydata.tgz`
+      - these files will subsequently be restored every time Levinux reboots
 
-1. Download the package and any dependencies from http://distro.ibiblio.org/tinycorelinux/6.x/x86/tcz/ (dependencies are listed in the {package}.tcz.dep file).
-2. Add the downloaded `.tcz` files to `/Reset/Server/Ingredients/Custom`
-3. Add the name of the downloaded package **without the `.tcz` file extension** to `/Reset/Server/Ingredients/extras.lst`
+- - - -
 
-**Optional:** `/Reset/Server/Ingredients/install_extras.sh` can be duplicated and point at a file other than `extras.lst`.  This can allow for different packages to be grouped and have group output silenced by pointing the output to `/dev/null`
+#### Customization
 
-**Note:** Ensure you do not write below the last line in the `extras.lst` file
+* TCZ extensions:
+  1. [browse the list](http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/) of available TCZ extensions
+     - each TCZ extension has the filename extension: `.tcz`
+     - each TCZ extension includes a list of its dependencies, which has the filename extension: `.tcz.dep`
+  2. download all of the necessary `.tcz` files
+     - save to the directory path: `./Reset/Server/Ingredients/Custom`
+  3. update the list of extra TCZ extensions
+     - edit the file: [`extras.lst`](./Reset/Server/Ingredients/extras.lst)
+     - add the name of every new `.tcz` file, but exclude the filename extension: `.tcz`
+     - notes:
+       * these edits will only take effect after `Recipe.sh` runs
+       * to update this list in an initialized instance of Levinux,<br>apply these edits to the file at the virtual filepath: `/home/tc/.extras/extras.lst`
 
-## Upgrade Instructions
-Generally speaking, Levinux will use the most recent version of TinyCore Linux available.  If it is out of date, it will be upgraded in a timely manner.  For the time being, this upgrade will be performed by @miklevin himself to ensure the validity of the image.  
+#### Upgrading the version of _Tiny Core Linux_
 
-That being said, if you want to upgrade on your own, the process is simple:
-
-1. Download the latest core-current.iso from http://distro.ibiblio.org/tinycorelinux/downloads.html Use the ~9MB file labeled Core.
-2. Open the .iso image and go into the boot directory. Some versions of Windows may require special software for this.
-3. Copy the files named core.gz and vmlinuz into the MacOS directory and overwrite the existing versions.
-
-That's it.  Start the levinux application and it should show the version number.
+1. open a web browser to the _Tiny Core Linux_ [download page](http://distro.ibiblio.org/tinycorelinux/downloads.html)
+   - navigate to the _Core x86 Release Files_
+     * for example, [version 7.x](http://distro.ibiblio.org/tinycorelinux/7.x/x86/release/)
+   - download the file: `Core-x.x.iso`
+     * for example, [Core-7.2.iso](http://distro.ibiblio.org/tinycorelinux/7.x/x86/release/Core-7.2.iso) at 10.6 MB
+2. open the .iso file
+   - note: [7-Zip](https://www.7-zip.org/) works great
+   - extract the files:
+     * `/boot/core.gz`
+     * `/boot/vmlinuz`
+3. save these two files to the directory path: `./Levinux.app/Contents/MacOS`
+   - overwrite the existing files

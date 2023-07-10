@@ -1,0 +1,12 @@
+# List packages without their .tcz extension.
+# It is best to load dependencies first.
+
+# http://tinycorelinux.net/3.x/tcz/tree.tcz
+tree
+
+# http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/ncurses.tcz
+# http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/readline.tcz
+# http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/bash.tcz
+ncurses
+readline
+bash

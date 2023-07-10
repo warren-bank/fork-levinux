@@ -1,7 +1,7 @@
 @echo off
 
 set QEMU_DIR=%~dp0..\..\QEMU
-set TFTP_DIR=%~dp0..\..\customize
+set TFTP_DIR=%~dp0..\..\tftp
 
 cd /D "%QEMU_DIR%"
 

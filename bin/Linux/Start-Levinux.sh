@@ -9,7 +9,7 @@ fi
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 QEMU_DIR="${DIR}/../../QEMU"
-TFTP_DIR="${DIR}/../../customize"
+TFTP_DIR="${DIR}/../../tftp"
 
 cd "$QEMU_DIR"
 

@@ -19,7 +19,7 @@
 #### Default Configuration
 
 * users:
-  - `tc:foo`
+  - `tc:tc`
 * TCZ extensions:
   - [dropbear](https://github.com/mkj/dropbear) SSH server
     * port in guest: `22`
@@ -27,7 +27,7 @@
     * command to connect with ssh client on host:
       ```bash
         ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 tc@localhost -p 2222
-        # password: foo
+        # password: tc
       ```
   - [busybox-httpd](https://oldwiki.archive.openwrt.org/doc/howto/http.httpd) HTTP server
     * port in guest: `80`
@@ -94,13 +94,14 @@
       |-- sda1/
       |   `-- home/
       |       `-- tc/
-      |           |-- Python3.sh
       |           |-- Recipe.sh
-      |           |-- drinkme.sh
-      |           `-- htdocs/
-      |               |-- favicon.ico
-      |               |-- index.html
-      |               `-- style.css
+      |           |-- htdocs/
+      |           |   `-- index.html
+      |           `-- install_scripts/
+      |               |-- install_curl.sh
+      |               |-- install_git.sh
+      |               |-- install_python.sh
+      |               `-- install_vim.sh
       |-- sdb1/
       |   `-- opt/
       |       |-- bootlocal.sh
@@ -113,10 +114,12 @@
               |-- onboot.lst
               |-- ondemand/
               `-- optional/
+                  |-- bash.tcz
                   |-- busybox-httpd.tcz
-                  |-- busybox-httpd.tcz.md5.txt
                   |-- dropbear.tcz
-                  `-- dropbear.tcz.md5.txt
+                  |-- ncurses.tcz
+                  |-- readline.tcz
+                  `-- tree.tcz
     ```
 * script: `/opt/bootsync.sh`
   - code:
@@ -140,56 +143,63 @@
       - the first time Levinux is started after its install
       - the first time Levinux is started after a factory reset
     * it copies the `Recipe.sh` script to the virtual filesystem, and runs it
-* script: [`/home/tc/Recipe.sh`](./customize/Recipe.sh)
+* script: [`/home/tc/Recipe.sh`](./tftp/Recipe.sh)
   - purpose:
     * installs the required TCZ extensions
       - copies the following files to the virtual directory path: `/mnt/sdc1/tce/optional`
-        * [`dropbear.tcz`](./customize/Ingredients/dropbear.tcz)
-        * [`busybox-httpd.tcz`](./customize/Ingredients/busybox-httpd.tcz)
+        * [`dropbear.tcz`](./tftp/foundation/extensions/dropbear/dropbear.tcz)
+        * [`busybox-httpd.tcz`](./tftp/foundation/extensions/busybox-httpd/busybox-httpd.tcz)
       - appends each of these filenames to the list: `/mnt/sdc1/tce/onboot.lst`
         * which causes them to be automatically loaded every time Levinux reboots
     * copies files for the required TCZ extensions
       - private encryption key for the SSH server (in both RSA and DSS formats)
-    * copies files that pertain to the Levinux mission
-      - static HTML files for the webserver
+    * copies files to demonstrate common use-cases
+      - static HTML file for the webserver
       - bash scripts that are intended for users to execute
-      - verbose welcome messages
+      - informative welcome messages:
+        * written to the terminal after boot
+        * written to the terminal after login
     * prepares for the installation of optional TCZ extensions
-      - copies the following files to the virtual directory path: `/home/tc/.extras`
-        * [`extras.lst`](./customize/Ingredients/extras.lst)
-        * [`install_extras.sh`](./customize/Ingredients/install_extras.sh)
-    * runs `install_extras.sh`
+      - copies the following file to the virtual directory path: `/home/tc/.extras`
+        * [`install_extras.sh`](./tftp/foundation/install_extras.sh)
+    * runs `install_extras.sh` after every boot
+      - copies the following file to the virtual directory path: `/home/tc/.extras`
+        * [`extras.lst`](./tftp/customize/extras.lst)
+      - for each TCZ extension included in this list
+        * copies the .tcz file to the virtual filesystem, if it hasn't already been copied
+        * loads the .tcz file into RAM
       - notes:
-        * optional TCZ extensions are __NOT__ automatically loaded every time Levinux reboots
-        * `install_extras.sh` does __NOT__ append each of these filenames to the list: `/mnt/sdc1/tce/onboot.lst`
-        * the script: `/home/tc/.extras/install_extras.sh`
-          - currently needs to be executed manually by the user after subsequent reboots
-          - could be appended to the file: `/opt/bootlocal.sh`
-            * this would run the script every time Levinux reboots
-            * but, this would be inefficient and unnecessarily overwrite the optional TCZ extensions before loading them
-            * although, a simple pre-check for file existence would fix that
-            * and, it would continue to allow for..
-              - additional TCZ extensions to be added at any time,<br>
-                by editing the virtual filepath: `/home/tc/.extras/extras.lst`
-              - subset groups of TCZ extensions to be stored as separate lists,<br>
-                and any particular list to be made primary at runtime,<br>
-                either by renaming or symbolically relinking
+        * these optional TCZ extensions are __NOT__ automatically loaded every time Levinux reboots
+          - they are intentionally __NOT__ added to the list: `/mnt/sdc1/tce/onboot.lst`
+        * the user can update the list between reboots
+          - only the TCZ extensions included in the list at runtime will be loaded
+          - new TCZ extensions may be added
+          - previously loaded TCZ extensions may be removed
+            * the .tcz file will remain in the virtual filesystem
+            * but it won't be loaded into RAM,<br>not until the TCZ extension is added back into the list
     * appends commands that need to run every time Levinux reboots to the file: `/opt/bootlocal.sh`
       - code:
         ```bash
-          /etc/init.d/dropbear start
+          /usr/local/etc/init.d/dropbear start
           /usr/local/httpd/sbin/httpd -p 80 -h /home/tc/htdocs -u tc:staff
+          /etc/hook_boot.sh
         ```
       - notes:
         * `/opt/bootlocal.sh` is called by `/opt/bootsync.sh`,<br>
           immediately after `Recipe.sh` is conditionally initialized
     * adds the user: `tc`
-      - sets its password to: `foo`
+      - sets its password to: `tc`
       - updates the file: `/opt/.filetool.lst`
         * appends the following virtual filepaths:
-          - `/etc/passwd`
-          - `/etc/shadow`
-        * this causes the new user to persist across reboots
+          ```text
+            etc/hook_boot.sh
+            etc/hook_login.sh
+            etc/passwd
+            etc/shadow
+            usr/local/etc/dropbear/dropbear_dss_host_key
+            usr/local/etc/dropbear/dropbear_rsa_host_key
+          ```
+        * which causes these files to persist across reboots
     * calls: `filetool.sh -b`
       - this calls [a feature](https://www.brianlinkletter.com/2014/02/persistent-configuration-changes-in-tinycore-linux/) of _Tiny Core Linux_
       - all files specified by `/opt/.filetool.lst` are backed up to the file: `/mnt/sdc1/tce/mydata.tgz`
@@ -204,13 +214,10 @@
      - each TCZ extension has the filename extension: `.tcz`
      - each TCZ extension includes a list of its dependencies, which has the filename extension: `.tcz.dep`
   2. download all of the necessary `.tcz` files
-     - save to the directory path: `./customize/Ingredients/Custom`
+     - save to the directory path: `./tftp/customize/extras`
   3. update the list of extra TCZ extensions
-     - edit the file: [`extras.lst`](./customize/Ingredients/extras.lst)
+     - edit the file: [`extras.lst`](./tftp/customize/extras.lst)
      - add the name of every new `.tcz` file, but exclude the filename extension: `.tcz`
-     - notes:
-       * these edits will only take effect after `Recipe.sh` runs
-       * to update this list in an initialized instance of Levinux,<br>apply these edits to the file at the virtual filepath: `/home/tc/.extras/extras.lst`
 
 #### Upgrading the version of _Tiny Core Linux_
 

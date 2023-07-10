@@ -14,14 +14,14 @@ set TIMESTAMP=%year%-%month%-%day%-T%hour%-%min%-%sec%
 cd /D "%QEMU_DIR%"
 
 move "home.qcow" "%SAVE_DIR%\home.%TIMESTAMP%.qcow"
-del "opt.qcow"
-del "tce.qcow"
+del /F /Q "opt.qcow"
+del /F /Q "tce.qcow"
 
 copy "home-fresh.qcow" "home.qcow"
 copy "opt-fresh.qcow" "opt.qcow"
 copy "tce-fresh.qcow" "tce.qcow"
 
-del "stderr.txt"
-del "stdout.txt"
-del "*conflicted*"
-del "%~dp0.\*ErrorLog*"
+del /F /Q "stderr.txt"
+del /F /Q "stdout.txt"
+del /F /Q "*conflicted*"
+del /F /Q "%~dp0.\*ErrorLog*"

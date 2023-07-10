@@ -11,14 +11,14 @@ TIMESTAMP=$(date '+%Y-%m-%d-T%H-%M-%S')
 cd "$QEMU_DIR"
 
 mv 'home.qcow' "${SAVE_DIR}/home.${TIMESTAMP}.qcow"
-rm 'opt.qcow'
-rm 'tce.qcow'
+rm -f 'opt.qcow'
+rm -f 'tce.qcow'
 
 cp 'home-fresh.qcow' 'home.qcow'
 cp 'opt-fresh.qcow' 'opt.qcow'
 cp 'tce-fresh.qcow' 'tce.qcow'
 
-rm 'stderr.txt'
-rm 'stdout.txt'
-rm '*conflicted*'
-rm "${DIR}/*ErrorLog*"
+rm -f 'stderr.txt'
+rm -f 'stdout.txt'
+rm -f '*conflicted*'
+rm -f "${DIR}/*ErrorLog*"

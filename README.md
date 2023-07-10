@@ -46,42 +46,46 @@
    - to any directory of your choosing
    - on any drive
 3. run the shell script that is appropriate for your host operating system:
-   - on Windows: [`WindowsLevinux.bat`](./WindowsLevinux.bat)
-   - on Linux: [`LinuxLevinux.sh`](./LinuxLevinux.sh)
-   - on Mac OSX: double-click `Levinux`
-     * or run: [`qemuonmac.sh`](./Levinux.app/Contents/Resources/qemuonmac.sh)
+   - on: [Windows](./bin/Windows/Start-Levinux.bat)
+   - on: [Linux](./bin/Linux/Start-Levinux.sh)
+   - on: [MacOS](./bin/MacOS/Start-Levinux.sh)<br>
+     or:
+     * open the directory: `./bin/MacOS`
+     * double-click: `Start-Levinux`
 
 #### OS-specific behavior
 
-* on Windows:
+* on _Windows_:
   - a prompt may ask permission to run the app and unblock the firewall
-* on Linux, Ubuntu 14.04 Nautilus:
+* on _Linux, Ubuntu 14.04 Nautilus_:
   - Edit &gt; Preferences &gt; Behavior &gt; Executable Text Files &gt; "Ask Each Time"
-* on Mac OSX:
+* on _MacOS_:
   - may require you to right-click or Control-click and open
 
 #### Factory Reset
 
 1. run the shell script that is appropriate for your host operating system:
-   - on Windows: [`ResetFromWindows.bat`](./Reset/ResetFromWindows.bat)
-   - on Linux: [`ResetFromLinux.sh`](./Reset/ResetFromLinux.sh)
-   - on Mac OSX: double-click `ResetFromMac`
-     * or run: [`ResetFromMac.sh`](./Reset/ResetFromMac.app/Contents/Resources/ResetFromMac.sh)
+   - on: [Windows](./bin/Windows/Reset-Levinux.bat)
+   - on: [Linux](./bin/Linux/Reset-Levinux.sh)
+   - on: [MacOS](./bin/MacOS/Reset-Levinux.sh)<br>
+     or:
+     * open the directory: `./bin/MacOS`
+     * double-click: `Reset-Levinux`
 
 - - - -
 
 #### Design
 
 * virtual filesystem
-  - [`home.qcow`](./Levinux.app/Contents/MacOS/home.qcow)
+  - [`home.qcow`](./QEMU/home.qcow)
     * mount points:
       - `/mnt/sda1`
       - `/home`
-  - [`opt.qcow`](./Levinux.app/Contents/MacOS/opt.qcow)
+  - [`opt.qcow`](./QEMU/opt.qcow)
     * mount points:
       - `/mnt/sdb1`
       - `/opt`
-  - [`tce.qcow`](./Levinux.app/Contents/MacOS/tce.qcow)
+  - [`tce.qcow`](./QEMU/tce.qcow)
     * mount points:
       - `/mnt/sdc1`
   - tree:
@@ -136,12 +140,12 @@
       - the first time Levinux is started after its install
       - the first time Levinux is started after a factory reset
     * it copies the `Recipe.sh` script to the virtual filesystem, and runs it
-* script: [`/home/tc/Recipe.sh`](./Reset/Server/Recipe.sh)
+* script: [`/home/tc/Recipe.sh`](./customize/Recipe.sh)
   - purpose:
     * installs the required TCZ extensions
       - copies the following files to the virtual directory path: `/mnt/sdc1/tce/optional`
-        * [`dropbear.tcz`](./Reset/Server/Ingredients/dropbear.tcz)
-        * [`busybox-httpd.tcz`](./Reset/Server/Ingredients/busybox-httpd.tcz)
+        * [`dropbear.tcz`](./customize/Ingredients/dropbear.tcz)
+        * [`busybox-httpd.tcz`](./customize/Ingredients/busybox-httpd.tcz)
       - appends each of these filenames to the list: `/mnt/sdc1/tce/onboot.lst`
         * which causes them to be automatically loaded every time Levinux reboots
     * copies files for the required TCZ extensions
@@ -152,8 +156,8 @@
       - verbose welcome messages
     * prepares for the installation of optional TCZ extensions
       - copies the following files to the virtual directory path: `/home/tc/.extras`
-        * [`extras.lst`](./Reset/Server/Ingredients/extras.lst)
-        * [`install_extras.sh`](./Reset/Server/Ingredients/install_extras.sh)
+        * [`extras.lst`](./customize/Ingredients/extras.lst)
+        * [`install_extras.sh`](./customize/Ingredients/install_extras.sh)
     * runs `install_extras.sh`
       - notes:
         * optional TCZ extensions are __NOT__ automatically loaded every time Levinux reboots
@@ -200,9 +204,9 @@
      - each TCZ extension has the filename extension: `.tcz`
      - each TCZ extension includes a list of its dependencies, which has the filename extension: `.tcz.dep`
   2. download all of the necessary `.tcz` files
-     - save to the directory path: `./Reset/Server/Ingredients/Custom`
+     - save to the directory path: `./customize/Ingredients/Custom`
   3. update the list of extra TCZ extensions
-     - edit the file: [`extras.lst`](./Reset/Server/Ingredients/extras.lst)
+     - edit the file: [`extras.lst`](./customize/Ingredients/extras.lst)
      - add the name of every new `.tcz` file, but exclude the filename extension: `.tcz`
      - notes:
        * these edits will only take effect after `Recipe.sh` runs
@@ -220,5 +224,5 @@
    - extract the files:
      * `/boot/core.gz`
      * `/boot/vmlinuz`
-3. save these two files to the directory path: `./Levinux.app/Contents/MacOS`
+3. save these two files to the directory path: `./QEMU`
    - overwrite the existing files

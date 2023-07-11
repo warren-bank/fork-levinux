@@ -15,5 +15,5 @@ cd "$QEMU_DIR"
 -hdc tce.qcow \
 -tftp "$TFTP_DIR" \
 -redir tcp:2222::22 \
--redir tcp:8080::80 \
+-redir tcp:1080::1080 \
 -append "quiet noautologin loglevel=3 home=sda1 opt=sdb1 tce=sdc1"

@@ -1,0 +1,4 @@
+http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/libedit.tcz
+http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/ncurses.tcz
+http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/openssh.tcz
+http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/openssl.tcz

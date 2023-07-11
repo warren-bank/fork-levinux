@@ -1,1 +1,0 @@
-http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/busybox-httpd.tcz

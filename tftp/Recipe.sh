@@ -5,17 +5,19 @@
 # ================================================
 
 guest_dir_home='/home/tc'
-guest_dir_htdocs="${guest_dir_home}/htdocs"
-guest_dir_install_scripts="${guest_dir_home}/install_scripts"
-guest_dir_extras="${guest_dir_home}/.extras"
+guest_dir_openvpn="${guest_dir_home}/openvpn"
+guest_dir_ovpncfg="${guest_dir_openvpn}/config"
 guest_dir_tce='/mnt/sdc1/tce'
 guest_dir_tcz="${guest_dir_tce}/optional"
 
+ovpnlist_fname='list.txt'
+ovpnauth_fname='auth.txt'
+ovpncfg_fname='ovpn.conf'
+
 tftp_dir_customize='/customize'
-tftp_dir_extras="${tftp_dir_customize}/extras"
+tftp_dir_openvpn="${tftp_dir_customize}/OpenVPN"
 tftp_dir_foundation='/foundation'
 tftp_dir_extensions="${tftp_dir_foundation}/extensions"
-tftp_dir_install_scripts="${tftp_dir_foundation}/install_scripts"
 
 clean_fresh_partitions() {
   [ -e "${guest_dir_home}/.ash_history" ] && rm -f "${guest_dir_home}/.ash_history"
@@ -29,33 +31,76 @@ configure_user() {
 }
 
 # [async] run script from: 'bootlocal.sh'
-install_extension_dropbear() {
-  tftp -g -l "${guest_dir_tcz}/dropbear.tcz" -r "${tftp_dir_extensions}/dropbear/dropbear.tcz" 10.0.2.2
+install_extension_openssh() {
+  tftp -g -l "${guest_dir_tcz}/ncurses.tcz" -r "${tftp_dir_extensions}/openssh/ncurses.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/openssl.tcz" -r "${tftp_dir_extensions}/openssh/openssl.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/libedit.tcz" -r "${tftp_dir_extensions}/openssh/libedit.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/openssh.tcz" -r "${tftp_dir_extensions}/openssh/openssh.tcz" 10.0.2.2
 
-  sudo -u tc tce-load -i dropbear > /dev/null
+  sudo -u tc tce-load -i ncurses > /dev/null
+  sudo -u tc tce-load -i openssl > /dev/null
+  sudo -u tc tce-load -i libedit > /dev/null
+  sudo -u tc tce-load -i openssh > /dev/null
 
-  [ -d '/usr/local/etc/dropbear' ] || mkdir '/usr/local/etc/dropbear'
-  tftp -g -l '/usr/local/etc/dropbear/dropbear_dss_host_key' -r "${tftp_dir_extensions}/dropbear/private_key/dropbear_dss_host_key" 10.0.2.2
-  tftp -g -l '/usr/local/etc/dropbear/dropbear_rsa_host_key' -r "${tftp_dir_extensions}/dropbear/private_key/dropbear_rsa_host_key" 10.0.2.2
+  # server config
+  sudo cp '/usr/local/etc/ssh/ssh_config.example' '/usr/local/etc/ssh/ssh_config'
+  sudo '/usr/local/bin/ssh-keygen' -A
 
-  echo 'dropbear.tcz' >> "${guest_dir_tce}/onboot.lst"
-  echo '/usr/local/etc/init.d/dropbear start > /dev/null' >> '/opt/bootlocal.sh'
-  echo 'usr/local/etc/dropbear/dropbear_dss_host_key'    >> '/opt/.filetool.lst'
-  echo 'usr/local/etc/dropbear/dropbear_rsa_host_key'    >> '/opt/.filetool.lst'
+  # tc user config
+  ssh_dir="${guest_dir_home}/.ssh"
+  [ -d "$ssh_dir" ] && rm -rf "$ssh_dir"
+  mkdir "$ssh_dir"
+  echo -n 'localhost ' > "${ssh_dir}/known_hosts"
+  cat '/usr/local/etc/ssh/ssh_host_rsa_key.pub' >> "${ssh_dir}/known_hosts"
+  '/usr/local/bin/ssh-keygen' -t rsa -b 1024 -f "${ssh_dir}/id_rsa" -q -N ''
+  cp "${ssh_dir}/id_rsa.pub" "${ssh_dir}/authorized_keys"
+  chown -R tc "$ssh_dir"
+
+  echo 'ncurses.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'openssl.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'libedit.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'openssh.tcz' >> "${guest_dir_tce}/onboot.lst"
+
+  echo '/usr/local/etc/init.d/openssh start & > /dev/null' >> '/opt/bootlocal.sh'
+  echo '(sleep 10 && sudo -u tc /usr/local/bin/ssh -f -N -D 0.0.0.0:1080 tc@localhost) &' >> '/opt/bootlocal.sh'
+  echo '/usr/local/etc/ssh/' >> '/opt/.filetool.lst'
 }
 
 # [async] run script from: 'bootlocal.sh'
-install_extension_busybox_httpd() {
-  tftp -g -l "${guest_dir_tcz}/busybox-httpd.tcz" -r "${tftp_dir_extensions}/busybox-httpd/busybox-httpd.tcz" 10.0.2.2
+install_extension_openvpn() {
+  tftp -g -l "${guest_dir_tcz}/db.tcz"               -r "${tftp_dir_extensions}/openvpn/db.tcz"               10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/lzo.tcz"              -r "${tftp_dir_extensions}/openvpn/lzo.tcz"              10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/openssl.tcz"          -r "${tftp_dir_extensions}/openvpn/openssl.tcz"          10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/iproute2.tcz"         -r "${tftp_dir_extensions}/openvpn/iproute2.tcz"         10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/libpkcs11-helper.tcz" -r "${tftp_dir_extensions}/openvpn/libpkcs11-helper.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/openvpn.tcz"          -r "${tftp_dir_extensions}/openvpn/openvpn.tcz"          10.0.2.2
 
-  sudo -u tc tce-load -i busybox-httpd > /dev/null
+  sudo -u tc tce-load -i db               > /dev/null
+  sudo -u tc tce-load -i lzo              > /dev/null
+  sudo -u tc tce-load -i openssl          > /dev/null
+  sudo -u tc tce-load -i iproute2         > /dev/null
+  sudo -u tc tce-load -i libpkcs11-helper > /dev/null
+  sudo -u tc tce-load -i openvpn          > /dev/null
 
-  [ -d "$guest_dir_htdocs" ] || mkdir "$guest_dir_htdocs"
-  tftp -g -l "${guest_dir_htdocs}/index.html" -r "${tftp_dir_extensions}/busybox-httpd/htdocs/index.html" 10.0.2.2
-  sudo chown -R tc "$guest_dir_htdocs"
+  prepare_openvpn_config
 
-  echo 'busybox-httpd.tcz' >> "${guest_dir_tce}/onboot.lst"
-  echo "/usr/local/httpd/sbin/httpd -p 80 -h '${guest_dir_htdocs}' -u tc:staff" >> '/opt/bootlocal.sh'
+  echo 'db.tcz'               >> "${guest_dir_tce}/onboot.lst"
+  echo 'lzo.tcz'              >> "${guest_dir_tce}/onboot.lst"
+  echo 'openssl.tcz'          >> "${guest_dir_tce}/onboot.lst"
+  echo 'iproute2.tcz'         >> "${guest_dir_tce}/onboot.lst"
+  echo 'libpkcs11-helper.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'openvpn.tcz'          >> "${guest_dir_tce}/onboot.lst"
+  echo "(cd '$guest_dir_ovpncfg' && openvpn --config '${guest_dir_ovpncfg}/${ovpncfg_fname}' --daemon --log '${guest_dir_openvpn}/log.txt' --verb 3)" >> '/opt/bootlocal.sh'
+
+  # add helper script to PATH that pipes the public IP address to stdout
+  fpath="${guest_dir_home}/.local/bin/ip"
+  touch "$fpath"
+  echo '#!/bin/sh' >> "$fpath"
+  echo 'wget -q -O - "http://ipecho.net/plain"' >> "$fpath"
+  chmod a+x "$fpath"
+
+  # after waiting 30 seconds for VPN to connect during startup, write the new public IP address to a text file in home directory
+  echo "(sleep 30 && '${fpath}' > '${guest_dir_home}/ip.txt') &" >> '/opt/bootlocal.sh'
 }
 
 prepare_bash_script() {
@@ -66,33 +111,17 @@ prepare_bash_script() {
   sudo chmod a+x       "$fpath"
 }
 
-prepare_installer_script() {
-  fname="$1"
+# [async] run script from: 'bootlocal.sh'
+prepare_openvpn_config() {
+  [ -d "$guest_dir_openvpn" ] || mkdir "$guest_dir_openvpn"
+  tftp -g -l "${guest_dir_openvpn}/prepare_openvpn_config.sh"  -r "${tftp_dir_extensions}/openvpn/config/prepare_openvpn_config.sh"  10.0.2.2
+  tftp -g -l "${guest_dir_openvpn}/select_random_line_in_file" -r "${tftp_dir_extensions}/openvpn/config/select_random_line_in_file" 10.0.2.2
+  tftp -g -l "${guest_dir_openvpn}/filter_openvpn_config.sh"   -r "${tftp_dir_extensions}/openvpn/config/filter_openvpn_config.sh"   10.0.2.2
+  prepare_bash_script "${guest_dir_openvpn}/prepare_openvpn_config.sh"
+  prepare_bash_script "${guest_dir_openvpn}/select_random_line_in_file"
+  prepare_bash_script "${guest_dir_openvpn}/filter_openvpn_config.sh"
 
-  [ -d "$guest_dir_install_scripts" ] || mkdir "$guest_dir_install_scripts"
-  tftp -g -l          "${guest_dir_install_scripts}/${fname}" -r "${tftp_dir_install_scripts}/${fname}" 10.0.2.2
-  prepare_bash_script "${guest_dir_install_scripts}/${fname}"
-}
-
-prepare_installer_scripts() {
-  prepare_installer_script 'install_curl.sh'
-  prepare_installer_script 'install_git.sh'
-  prepare_installer_script 'install_python.sh'
-  prepare_installer_script 'install_vim.sh'
-}
-
-# [sync] run script from: 'bootsync.sh'
-prepare_custom_extras() {
-  [ -d "$guest_dir_extras" ] || mkdir "$guest_dir_extras"
-  tftp -g -l "${guest_dir_extras}/install_extras.sh" -r "${tftp_dir_foundation}/install_extras.sh" 10.0.2.2
-  prepare_bash_script "${guest_dir_extras}/install_extras.sh"
-
-  echo "'${guest_dir_extras}/install_extras.sh' '${guest_dir_extras}/extras.lst' '${guest_dir_tcz}' '${tftp_dir_customize}/extras.lst' '${tftp_dir_extras}' > /dev/null" >> '/opt/bootsync.sh'
-}
-
-# invoke directly because 'bootsync.sh' is already running
-run_custom_extras() {
-  "${guest_dir_extras}/install_extras.sh" "${guest_dir_extras}/extras.lst" "$guest_dir_tcz" "${tftp_dir_customize}/extras.lst" "$tftp_dir_extras"
+  echo "'${guest_dir_openvpn}/prepare_openvpn_config.sh' '${guest_dir_ovpncfg}' '${tftp_dir_openvpn}' '${ovpnlist_fname}' '${ovpnauth_fname}' '${ovpncfg_fname}' '${guest_dir_openvpn}/select_random_line_in_file' '${guest_dir_openvpn}/filter_openvpn_config.sh' > /dev/null" >> '/opt/bootlocal.sh'
 }
 
 # [async] run script from: 'bootlocal.sh'
@@ -134,16 +163,13 @@ prepare_login_hook() {
 prepare_recipe() {
   clean_fresh_partitions
   configure_user
-  install_extension_dropbear
-  install_extension_busybox_httpd
-  prepare_installer_scripts
-  prepare_custom_extras
+  install_extension_openssh
+  install_extension_openvpn
   prepare_boot_hooks
   prepare_login_hook
 
   filetool.sh -b
 
-  run_custom_extras
   run_boot_hook_sync
 }
 

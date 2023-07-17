@@ -43,7 +43,10 @@ install_extension_openssh() {
   sudo -u tc tce-load -i openssh > /dev/null
 
   # server config
-  sudo cp '/usr/local/etc/ssh/ssh_config.example' '/usr/local/etc/ssh/ssh_config'
+  tftp -g -l '/usr/local/etc/ssh/ssh_config'  -r "${tftp_dir_extensions}/openssh/config/ssh_config"  10.0.2.2
+  tftp -g -l '/usr/local/etc/ssh/sshd_config' -r "${tftp_dir_extensions}/openssh/config/sshd_config" 10.0.2.2
+  normalize_eol '/usr/local/etc/ssh/ssh_config'
+  normalize_eol '/usr/local/etc/ssh/sshd_config'
   sudo '/usr/local/bin/ssh-keygen' -A
 
   # tc user config
@@ -92,23 +95,21 @@ install_extension_openvpn() {
   echo 'openvpn.tcz'          >> "${guest_dir_tce}/onboot.lst"
   echo "(cd '$guest_dir_ovpncfg' && openvpn --config '${guest_dir_ovpncfg}/${ovpncfg_fname}' --daemon --log '${guest_dir_openvpn}/log.txt' --verb 3)" >> '/opt/bootlocal.sh'
 
-  # add helper script to PATH that pipes the public IP address to stdout
-  fpath="${guest_dir_home}/.local/bin/ip"
-  touch "$fpath"
-  echo '#!/bin/sh' >> "$fpath"
-  echo 'wget -q -O - "http://ipecho.net/plain"' >> "$fpath"
-  chmod a+x "$fpath"
-
-  # after waiting 30 seconds for VPN to connect during startup, write the new public IP address to a text file in home directory
-  echo "(sleep 30 && '${fpath}' > '${guest_dir_home}/ip.txt') &" >> '/opt/bootlocal.sh'
+  prepare_openvpn_scripts
 }
 
-prepare_bash_script() {
+normalize_eol() {
   fpath="$1"
 
   sudo sed -i 's/\r//' "$fpath"
-  sudo chown tc        "$fpath"
-  sudo chmod a+x       "$fpath"
+}
+
+prepare_script() {
+  fpath="$1"
+
+  normalize_eol  "$fpath"
+  sudo chown tc  "$fpath"
+  sudo chmod a+x "$fpath"
 }
 
 # [async] run script from: 'bootlocal.sh'
@@ -117,17 +118,29 @@ prepare_openvpn_config() {
   tftp -g -l "${guest_dir_openvpn}/prepare_openvpn_config.sh"  -r "${tftp_dir_extensions}/openvpn/config/prepare_openvpn_config.sh"  10.0.2.2
   tftp -g -l "${guest_dir_openvpn}/select_random_line_in_file" -r "${tftp_dir_extensions}/openvpn/config/select_random_line_in_file" 10.0.2.2
   tftp -g -l "${guest_dir_openvpn}/filter_openvpn_config.sh"   -r "${tftp_dir_extensions}/openvpn/config/filter_openvpn_config.sh"   10.0.2.2
-  prepare_bash_script "${guest_dir_openvpn}/prepare_openvpn_config.sh"
-  prepare_bash_script "${guest_dir_openvpn}/select_random_line_in_file"
-  prepare_bash_script "${guest_dir_openvpn}/filter_openvpn_config.sh"
+  prepare_script "${guest_dir_openvpn}/prepare_openvpn_config.sh"
+  prepare_script "${guest_dir_openvpn}/select_random_line_in_file"
+  prepare_script "${guest_dir_openvpn}/filter_openvpn_config.sh"
 
   echo "'${guest_dir_openvpn}/prepare_openvpn_config.sh' '${guest_dir_ovpncfg}' '${tftp_dir_openvpn}' '${ovpnlist_fname}' '${ovpnauth_fname}' '${ovpncfg_fname}' '${guest_dir_openvpn}/select_random_line_in_file' '${guest_dir_openvpn}/filter_openvpn_config.sh' > /dev/null" >> '/opt/bootlocal.sh'
 }
 
 # [async] run script from: 'bootlocal.sh'
+prepare_openvpn_scripts() {
+  # add helper script to PATH: ip
+  #   - output:  prints public IP address to stdout
+  #   - purpose: to verify that VPN is connected
+  tftp -g -l "${guest_dir_home}/.local/bin/ip" -r "${tftp_dir_extensions}/openvpn/scripts/ip" 10.0.2.2
+  prepare_script "${guest_dir_home}/.local/bin/ip"
+
+  # after waiting 30 seconds for VPN to connect during startup, write the new public IP address to a text file in home directory
+  echo "(sleep 30 && '${guest_dir_home}/.local/bin/ip' > '${guest_dir_home}/ip.txt') &" >> '/opt/bootlocal.sh'
+}
+
+# [async] run script from: 'bootlocal.sh'
 prepare_boot_hook_async() {
   tftp -g -l '/etc/hook_boot_async.sh' -r "${tftp_dir_foundation}/hook_boot_async.sh" 10.0.2.2
-  prepare_bash_script '/etc/hook_boot_async.sh'
+  prepare_script '/etc/hook_boot_async.sh'
 
   echo '/etc/hook_boot_async.sh' >> '/opt/bootlocal.sh'
   echo 'etc/hook_boot_async.sh'  >> '/opt/.filetool.lst'
@@ -136,7 +149,7 @@ prepare_boot_hook_async() {
 # [sync] run script from: 'bootsync.sh'
 prepare_boot_hook_sync() {
   tftp -g -l '/etc/hook_boot_sync.sh' -r "${tftp_dir_foundation}/hook_boot_sync.sh" 10.0.2.2
-  prepare_bash_script '/etc/hook_boot_sync.sh'
+  prepare_script '/etc/hook_boot_sync.sh'
 
   echo '/etc/hook_boot_sync.sh' >> '/opt/bootsync.sh'
   echo 'etc/hook_boot_sync.sh'  >> '/opt/.filetool.lst'
@@ -154,7 +167,7 @@ prepare_boot_hooks() {
 
 prepare_login_hook() {
   tftp -g -l '/etc/hook_login.sh' -r "${tftp_dir_foundation}/hook_login.sh" 10.0.2.2
-  prepare_bash_script '/etc/hook_login.sh'
+  prepare_script '/etc/hook_login.sh'
 
   echo '/etc/hook_login.sh' >> "${guest_dir_home}/.profile"
   echo 'etc/hook_login.sh'  >> '/opt/.filetool.lst'

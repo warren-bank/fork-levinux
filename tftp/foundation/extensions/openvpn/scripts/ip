@@ -1,0 +1,4 @@
+#!/bin/sh
+
+wget -q -O - 'http://ipecho.net/plain'
+echo ''

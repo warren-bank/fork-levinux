@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-url='http://ipecho.net/plain'
+url='http://ipv4.icanhazip.com/'
 proxy='socks5h://localhost:1080'
 
 ip_real=$(curl --silent "$url")

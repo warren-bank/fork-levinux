@@ -1,4 +1,4 @@
 #!/bin/sh
 
-wget -q -O - 'http://ipecho.net/plain'
+wget -q -O - 'http://ipv4.icanhazip.com/'
 echo ''

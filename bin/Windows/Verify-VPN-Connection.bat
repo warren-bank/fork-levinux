@@ -1,6 +1,6 @@
 @echo off
 
-set url="http://ipecho.net/plain"
+set url="http://ipv4.icanhazip.com/"
 set proxy="socks5h://localhost:1080"
 
 set curl_opts=--silent %url%

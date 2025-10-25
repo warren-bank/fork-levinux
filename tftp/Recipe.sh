@@ -32,21 +32,24 @@ configure_user() {
 
 # [async] run script from: 'bootlocal.sh'
 install_extension_openssh() {
-  tftp -g -l "${guest_dir_tcz}/ncurses.tcz" -r "${tftp_dir_extensions}/openssh/ncurses.tcz" 10.0.2.2
-  tftp -g -l "${guest_dir_tcz}/openssl.tcz" -r "${tftp_dir_extensions}/openssh/openssl.tcz" 10.0.2.2
-  tftp -g -l "${guest_dir_tcz}/libedit.tcz" -r "${tftp_dir_extensions}/openssh/libedit.tcz" 10.0.2.2
-  tftp -g -l "${guest_dir_tcz}/openssh.tcz" -r "${tftp_dir_extensions}/openssh/openssh.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/gcc_libs.tcz" -r "${tftp_dir_extensions}/openssh/gcc_libs.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/libedit.tcz"  -r "${tftp_dir_extensions}/openssh/libedit.tcz"  10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/ncursesw.tcz" -r "${tftp_dir_extensions}/openssh/ncursesw.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/openssl.tcz"  -r "${tftp_dir_extensions}/openssh/openssl.tcz"  10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/openssh.tcz"  -r "${tftp_dir_extensions}/openssh/openssh.tcz"  10.0.2.2
 
-  sudo -u tc tce-load -i ncurses > /dev/null
-  sudo -u tc tce-load -i openssl > /dev/null
-  sudo -u tc tce-load -i libedit > /dev/null
-  sudo -u tc tce-load -i openssh > /dev/null
+  sudo -u tc tce-load -i gcc_libs > /dev/null
+  sudo -u tc tce-load -i libedit  > /dev/null
+  sudo -u tc tce-load -i ncursesw > /dev/null
+  sudo -u tc tce-load -i openssl  > /dev/null
+  sudo -u tc tce-load -i openssh  > /dev/null
 
   # server config
   tftp -g -l '/usr/local/etc/ssh/ssh_config'  -r "${tftp_dir_extensions}/openssh/config/ssh_config"  10.0.2.2
   tftp -g -l '/usr/local/etc/ssh/sshd_config' -r "${tftp_dir_extensions}/openssh/config/sshd_config" 10.0.2.2
   normalize_eol '/usr/local/etc/ssh/ssh_config'
   normalize_eol '/usr/local/etc/ssh/sshd_config'
+  sudo touch '/usr/local/etc/ssh/ssh_host_dsa_key'
   sudo '/usr/local/bin/ssh-keygen' -A
 
   # tc user config
@@ -59,10 +62,11 @@ install_extension_openssh() {
   cp "${ssh_dir}/id_rsa.pub" "${ssh_dir}/authorized_keys"
   chown -R tc "$ssh_dir"
 
-  echo 'ncurses.tcz' >> "${guest_dir_tce}/onboot.lst"
-  echo 'openssl.tcz' >> "${guest_dir_tce}/onboot.lst"
-  echo 'libedit.tcz' >> "${guest_dir_tce}/onboot.lst"
-  echo 'openssh.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'gcc_libs.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'libedit.tcz'  >> "${guest_dir_tce}/onboot.lst"
+  echo 'ncursesw.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'openssl.tcz'  >> "${guest_dir_tce}/onboot.lst"
+  echo 'openssh.tcz'  >> "${guest_dir_tce}/onboot.lst"
 
   echo '/usr/local/etc/init.d/openssh start & > /dev/null' >> '/opt/bootlocal.sh'
   echo '(sleep 10 && sudo -u tc /usr/local/bin/ssh -f -N -D 0.0.0.0:1080 tc@localhost) &' >> '/opt/bootlocal.sh'

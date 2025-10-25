@@ -2,7 +2,7 @@
 
 #### This Customization
 
-* branch: [`custom/tcl-07.02/socks5_openvpn`](https://github.com/warren-bank/fork-levinux/tree/custom/tcl-07.02/socks5_openvpn)
+* branch: [`custom/tcl-16.02/socks5_openvpn`](https://github.com/warren-bank/fork-levinux/tree/custom/tcl-16.02/socks5_openvpn)
   - forked from branch: [`mainline`](https://github.com/warren-bank/fork-levinux/tree/mainline)
     * forked from branch: [`upstream`](https://github.com/warren-bank/fork-levinux/tree/upstream)
       - mirror of repo: [`levinux`](https://github.com/miklevin/levinux)
@@ -36,14 +36,14 @@
 #### Components
 
 * [QEMU PC emulator](https://www.qemu.org/) version 0.12.5 (32-bit)
-* [Tiny Core Linux](http://tinycorelinux.net/) version 7.2
-  - [TCZ extensions](http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/)
+* [Tiny Core Linux](http://tinycorelinux.net/) version 16.2
+  - [TCZ extensions](http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/)
 
 #### Features
 
 * micro
-  - 23.5 MB zip file
-  - 33.5 MB unpacked size on disk
+  - 35.0 MB zip file
+  - 45.0 MB unpacked size on disk
 * portable
   - runs from USB or _Dropbox_
   - no admin rights are required
@@ -51,7 +51,7 @@
 
 #### Usage
 
-1. download a [snapshot of this branch](https://github.com/warren-bank/fork-levinux/archive/refs/heads/custom/tcl-07.02/socks5_openvpn.zip) from the github repo
+1. download a [snapshot of this branch](https://github.com/warren-bank/fork-levinux/archive/refs/heads/custom/tcl-16.02/socks5_openvpn.zip) from the github repo
 2. unzip
    - to any directory of your choosing
    - on any drive
@@ -149,9 +149,9 @@ __external references__:
 
 1. open a web browser to the _Tiny Core Linux_ [download page](http://distro.ibiblio.org/tinycorelinux/downloads.html)
    - navigate to the _Core x86 Release Files_
-     * for example, [version 7.x](http://distro.ibiblio.org/tinycorelinux/7.x/x86/release/)
+     * for example, [version 16.x](http://distro.ibiblio.org/tinycorelinux/16.x/x86/release/)
    - download the file: `Core-x.x.iso`
-     * for example, [Core-7.2.iso](http://distro.ibiblio.org/tinycorelinux/7.x/x86/release/Core-7.2.iso) at 10.6 MB
+     * for example, [Core-16.2.iso](http://distro.ibiblio.org/tinycorelinux/16.x/x86/release/Core-16.2.iso) at 18.5 MB
 2. open the .iso file
    - note: [7-Zip](https://www.7-zip.org/) works great
    - extract the files:

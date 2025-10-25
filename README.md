@@ -2,7 +2,7 @@
 
 #### This Customization
 
-* branch: [`custom/socks5_openvpn`](https://github.com/warren-bank/fork-levinux/tree/custom/socks5_openvpn)
+* branch: [`custom/tcl-07.02/socks5_openvpn`](https://github.com/warren-bank/fork-levinux/tree/custom/tcl-07.02/socks5_openvpn)
   - forked from branch: [`mainline`](https://github.com/warren-bank/fork-levinux/tree/mainline)
     * forked from branch: [`upstream`](https://github.com/warren-bank/fork-levinux/tree/upstream)
       - mirror of repo: [`levinux`](https://github.com/miklevin/levinux)
@@ -51,7 +51,7 @@
 
 #### Usage
 
-1. download a [snapshot of this branch](https://github.com/warren-bank/fork-levinux/archive/refs/heads/custom/socks5_openvpn.zip) from the github repo
+1. download a [snapshot of this branch](https://github.com/warren-bank/fork-levinux/archive/refs/heads/custom/tcl-07.02/socks5_openvpn.zip) from the github repo
 2. unzip
    - to any directory of your choosing
    - on any drive

@@ -1,0 +1,6 @@
+http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/db.tcz
+http://distro.ibiblio.org/tinycorelinux/10.x/x86/tcz/iproute2.tcz
+http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/iptables.tcz
+http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/ipv6-netfilter-6.12.11-tinycore.tcz
+http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/openresolv.tcz
+http://distro.ibiblio.org/tinycorelinux/10.x/x86/tcz/wireguard-tools.tcz

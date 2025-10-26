@@ -2,7 +2,7 @@
 
 #### This Customization
 
-* branch: [`custom/tcl-16.02/socks5_openvpn`](https://github.com/warren-bank/fork-levinux/tree/custom/tcl-16.02/socks5_openvpn)
+* branch: [`custom/tcl-16.02/socks5_wireguard`](https://github.com/warren-bank/fork-levinux/tree/custom/tcl-16.02/socks5_wireguard)
   - forked from branch: [`mainline`](https://github.com/warren-bank/fork-levinux/tree/mainline)
     * forked from branch: [`upstream`](https://github.com/warren-bank/fork-levinux/tree/upstream)
       - mirror of repo: [`levinux`](https://github.com/miklevin/levinux)
@@ -11,7 +11,7 @@
 * users:
   - `tc:tc`
 * TCZ extensions:
-  - [OpenVPN](https://github.com/OpenVPN/openvpn) secure tunneling daemon
+  - [WireGuard](https://www.wireguard.com/) userspace tools
   - [OpenSSH](https://github.com/openssh/openssh-portable) SSH client and server
     * SSH server
       - port in guest: `22`
@@ -51,12 +51,12 @@
 
 #### Usage
 
-1. download a [snapshot of this branch](https://github.com/warren-bank/fork-levinux/archive/refs/heads/custom/tcl-16.02/socks5_openvpn.zip) from the github repo
+1. download a [snapshot of this branch](https://github.com/warren-bank/fork-levinux/archive/refs/heads/custom/tcl-16.02/socks5_wireguard.zip) from the github repo
 2. unzip
    - to any directory of your choosing
    - on any drive
 3. configure
-   - [OpenVPN](#openvpn-configuration)
+   - [WireGuard](#wireguard-configuration)
    - [OpenSSH](#openssh-configuration)
 4. run the shell script that is appropriate for your host operating system:
    - on: [Windows](./bin/Windows/Start-Levinux.bat)
@@ -78,45 +78,36 @@
 
 __notes__:
 
-* [Factory Reset](#factory-reset) does not undo [OpenVPN Configuration](#openvpn-configuration) or [OpenSSH Configuration](#openssh-configuration)
+* [Factory Reset](#factory-reset) does not undo [WireGuard Configuration](#wireguard-configuration) or [OpenSSH Configuration](#openssh-configuration)
 
 - - - -
 
-#### OpenVPN Configuration
+#### WireGuard Configuration
 
 ###### _(required)_
 
-* copy one or more OpenVPN config files to the directory:<br>`./tftp/customize/OpenVPN`
-* add the filename of one or more OpenVPN config file(s) to the list file:<br>`./tftp/customize/OpenVPN/list.txt`
-* for convenience, I'd suggest to:
-  - add a text file named `auth.txt` to this directory,<br>which contains VPN account username and password authorization credentials
-  - edit each OpenVPN config file to use `auth.txt`
+* copy one or more WireGuard config files to the directory:<br>`./tftp/customize/WireGuard`
+* add the filename of one or more WireGuard config file(s) to the list file:<br>`./tftp/customize/WireGuard/list.txt`
 
 __example__:
 
 ```bash
-  cd ./tftp/customize/OpenVPN
+  cd ./tftp/customize/WireGuard
 
-  find *.ovpn >list.txt
-
-  echo "$vpn_username"  >auth.txt
-  echo "$vpn_password" >>auth.txt
-
-  sed -i -E 's/^(auth-user-pass).*$/\1 auth.txt/g' *.ovpn
+  find *.conf >list.txt
 ```
 
 __notes__:
 
-* the OpenVPN config files can have any filename
-  - for clarity, the previous example assumed that these OpenVPN config files have the filename extension: `.ovpn`
-* only one OpenVPN config file is used to establish a VPN connection
+* the WireGuard config files can have any filename
+  - for clarity, the previous example assumed that these WireGuard config files have the filename extension: `.conf`
+* only one WireGuard config file is used to establish a VPN connection
 * when `list.txt` contains only a single filename
-  - this specific OpenVPN config file will be used
+  - this specific WireGuard config file will be used
 * when `list.txt` contains multiple filenames
   - only one filename will be randomly selected from the list
-  - only this OpenVPN config file will be used
-* when `auth.txt` exists
-  - this file will be copied to the same directory as the OpenVPN config file in use
+  - only this WireGuard config file will be used
+* the WireGuard network interface is assigned the name: `tun0`
 
 - - - -
 

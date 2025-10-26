@@ -5,17 +5,16 @@
 # ================================================
 
 guest_dir_home='/home/tc'
-guest_dir_openvpn="${guest_dir_home}/openvpn"
-guest_dir_ovpncfg="${guest_dir_openvpn}/config"
+guest_dir_wireguard="${guest_dir_home}/wireguard"
+guest_dir_confcfg="${guest_dir_wireguard}/config"
 guest_dir_tce='/mnt/sdc1/tce'
 guest_dir_tcz="${guest_dir_tce}/optional"
 
-ovpnlist_fname='list.txt'
-ovpnauth_fname='auth.txt'
-ovpncfg_fname='ovpn.conf'
+conflist_fname='list.txt'
+confcfg_fname='tun0.conf'
 
 tftp_dir_customize='/customize'
-tftp_dir_openvpn="${tftp_dir_customize}/OpenVPN"
+tftp_dir_wireguard="${tftp_dir_customize}/WireGuard"
 tftp_dir_foundation='/foundation'
 tftp_dir_extensions="${tftp_dir_foundation}/extensions"
 
@@ -74,32 +73,48 @@ install_extension_openssh() {
 }
 
 # [async] run script from: 'bootlocal.sh'
-install_extension_openvpn() {
-  tftp -g -l "${guest_dir_tcz}/db.tcz"               -r "${tftp_dir_extensions}/openvpn/db.tcz"               10.0.2.2
-  tftp -g -l "${guest_dir_tcz}/lzo.tcz"              -r "${tftp_dir_extensions}/openvpn/lzo.tcz"              10.0.2.2
-  tftp -g -l "${guest_dir_tcz}/openssl.tcz"          -r "${tftp_dir_extensions}/openvpn/openssl.tcz"          10.0.2.2
-  tftp -g -l "${guest_dir_tcz}/iproute2.tcz"         -r "${tftp_dir_extensions}/openvpn/iproute2.tcz"         10.0.2.2
-  tftp -g -l "${guest_dir_tcz}/libpkcs11-helper.tcz" -r "${tftp_dir_extensions}/openvpn/libpkcs11-helper.tcz" 10.0.2.2
-  tftp -g -l "${guest_dir_tcz}/openvpn.tcz"          -r "${tftp_dir_extensions}/openvpn/openvpn.tcz"          10.0.2.2
+install_extension_wireguard() {
+  install_extension_bash
 
-  sudo -u tc tce-load -i db               > /dev/null
-  sudo -u tc tce-load -i lzo              > /dev/null
-  sudo -u tc tce-load -i openssl          > /dev/null
-  sudo -u tc tce-load -i iproute2         > /dev/null
-  sudo -u tc tce-load -i libpkcs11-helper > /dev/null
-  sudo -u tc tce-load -i openvpn          > /dev/null
+  tftp -g -l "${guest_dir_tcz}/db.tcz"                              -r "${tftp_dir_extensions}/wireguard/db.tcz"                              10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/iproute2.tcz"                        -r "${tftp_dir_extensions}/wireguard/iproute2.tcz"                        10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/iptables.tcz"                        -r "${tftp_dir_extensions}/wireguard/iptables.tcz"                        10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/ipv6-netfilter-6.12.11-tinycore.tcz" -r "${tftp_dir_extensions}/wireguard/ipv6-netfilter-6.12.11-tinycore.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/openresolv.tcz"                      -r "${tftp_dir_extensions}/wireguard/openresolv.tcz"                      10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/wireguard-tools.tcz"                 -r "${tftp_dir_extensions}/wireguard/wireguard-tools.tcz"                 10.0.2.2
 
-  prepare_openvpn_config
+  sudo -u tc tce-load -i db                              > /dev/null
+  sudo -u tc tce-load -i iproute2                        > /dev/null
+  sudo -u tc tce-load -i iptables                        > /dev/null
+  sudo -u tc tce-load -i ipv6-netfilter-6.12.11-tinycore > /dev/null
+  sudo -u tc tce-load -i openresolv                      > /dev/null
+  sudo -u tc tce-load -i wireguard-tools                 > /dev/null
 
-  echo 'db.tcz'               >> "${guest_dir_tce}/onboot.lst"
-  echo 'lzo.tcz'              >> "${guest_dir_tce}/onboot.lst"
-  echo 'openssl.tcz'          >> "${guest_dir_tce}/onboot.lst"
-  echo 'iproute2.tcz'         >> "${guest_dir_tce}/onboot.lst"
-  echo 'libpkcs11-helper.tcz' >> "${guest_dir_tce}/onboot.lst"
-  echo 'openvpn.tcz'          >> "${guest_dir_tce}/onboot.lst"
-  echo "(cd '$guest_dir_ovpncfg' && openvpn --config '${guest_dir_ovpncfg}/${ovpncfg_fname}' --daemon --log '${guest_dir_openvpn}/log.txt' --verb 3)" >> '/opt/bootlocal.sh'
+  prepare_wireguard_config
 
-  prepare_openvpn_scripts
+  echo 'db.tcz'                              >> "${guest_dir_tce}/onboot.lst"
+  echo 'iproute2.tcz'                        >> "${guest_dir_tce}/onboot.lst"
+  echo 'iptables.tcz'                        >> "${guest_dir_tce}/onboot.lst"
+  echo 'ipv6-netfilter-6.12.11-tinycore.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'openresolv.tcz'                      >> "${guest_dir_tce}/onboot.lst"
+  echo 'wireguard-tools.tcz'                 >> "${guest_dir_tce}/onboot.lst"
+  echo "sudo wg-quick up '${guest_dir_confcfg}/${confcfg_fname}' >'${guest_dir_wireguard}/wg-quick.log' 2>&1" >> '/opt/bootlocal.sh'
+
+  prepare_wireguard_scripts
+}
+
+install_extension_bash() {
+  tftp -g -l "${guest_dir_tcz}/bash.tcz"     -r "${tftp_dir_extensions}/bash/bash.tcz"     10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/ncursesw.tcz" -r "${tftp_dir_extensions}/bash/ncursesw.tcz" 10.0.2.2
+  tftp -g -l "${guest_dir_tcz}/readline.tcz" -r "${tftp_dir_extensions}/bash/readline.tcz" 10.0.2.2
+
+  sudo -u tc tce-load -i bash     > /dev/null
+  sudo -u tc tce-load -i ncursesw > /dev/null
+  sudo -u tc tce-load -i readline > /dev/null
+
+  echo 'bash.tcz'     >> "${guest_dir_tce}/onboot.lst"
+  echo 'ncursesw.tcz' >> "${guest_dir_tce}/onboot.lst"
+  echo 'readline.tcz' >> "${guest_dir_tce}/onboot.lst"
 }
 
 normalize_eol() {
@@ -117,28 +132,26 @@ prepare_script() {
 }
 
 # [async] run script from: 'bootlocal.sh'
-prepare_openvpn_config() {
-  [ -d "$guest_dir_openvpn" ] || mkdir "$guest_dir_openvpn"
-  tftp -g -l "${guest_dir_openvpn}/prepare_openvpn_config.sh"  -r "${tftp_dir_extensions}/openvpn/config/prepare_openvpn_config.sh"  10.0.2.2
-  tftp -g -l "${guest_dir_openvpn}/select_random_line_in_file" -r "${tftp_dir_extensions}/openvpn/config/select_random_line_in_file" 10.0.2.2
-  tftp -g -l "${guest_dir_openvpn}/filter_openvpn_config.sh"   -r "${tftp_dir_extensions}/openvpn/config/filter_openvpn_config.sh"   10.0.2.2
-  prepare_script "${guest_dir_openvpn}/prepare_openvpn_config.sh"
-  prepare_script "${guest_dir_openvpn}/select_random_line_in_file"
-  prepare_script "${guest_dir_openvpn}/filter_openvpn_config.sh"
+prepare_wireguard_config() {
+  [ -d "$guest_dir_wireguard" ] || mkdir "$guest_dir_wireguard"
+  tftp -g -l "${guest_dir_wireguard}/prepare_wireguard_config.sh" -r "${tftp_dir_extensions}/wireguard/config/prepare_wireguard_config.sh" 10.0.2.2
+  tftp -g -l "${guest_dir_wireguard}/select_random_line_in_file"  -r "${tftp_dir_extensions}/wireguard/config/select_random_line_in_file"  10.0.2.2
+  prepare_script "${guest_dir_wireguard}/prepare_wireguard_config.sh"
+  prepare_script "${guest_dir_wireguard}/select_random_line_in_file"
 
-  echo "'${guest_dir_openvpn}/prepare_openvpn_config.sh' '${guest_dir_ovpncfg}' '${tftp_dir_openvpn}' '${ovpnlist_fname}' '${ovpnauth_fname}' '${ovpncfg_fname}' '${guest_dir_openvpn}/select_random_line_in_file' '${guest_dir_openvpn}/filter_openvpn_config.sh' > /dev/null" >> '/opt/bootlocal.sh'
+  echo "'${guest_dir_wireguard}/prepare_wireguard_config.sh' '${guest_dir_confcfg}' '${tftp_dir_wireguard}' '${conflist_fname}' '${confcfg_fname}' '${guest_dir_wireguard}/select_random_line_in_file' > /dev/null" >> '/opt/bootlocal.sh'
 }
 
 # [async] run script from: 'bootlocal.sh'
-prepare_openvpn_scripts() {
-  # add helper script to PATH: ip
+prepare_wireguard_scripts() {
+  # add helper script to PATH: print-my-ip
   #   - output:  prints public IP address to stdout
   #   - purpose: to verify that VPN is connected
-  tftp -g -l "${guest_dir_home}/.local/bin/ip" -r "${tftp_dir_extensions}/openvpn/scripts/ip" 10.0.2.2
-  prepare_script "${guest_dir_home}/.local/bin/ip"
+  tftp -g -l "${guest_dir_home}/.local/bin/print-my-ip" -r "${tftp_dir_extensions}/wireguard/scripts/print-my-ip" 10.0.2.2
+  prepare_script "${guest_dir_home}/.local/bin/print-my-ip"
 
   # after waiting 30 seconds for VPN to connect during startup, write the new public IP address to a text file in home directory
-  echo "(sleep 30 && '${guest_dir_home}/.local/bin/ip' > '${guest_dir_home}/ip.txt') &" >> '/opt/bootlocal.sh'
+  echo "(sleep 30 && '${guest_dir_home}/.local/bin/print-my-ip' > '${guest_dir_home}/ip.txt') &" >> '/opt/bootlocal.sh'
 }
 
 # [async] run script from: 'bootlocal.sh'
@@ -181,7 +194,7 @@ prepare_recipe() {
   clean_fresh_partitions
   configure_user
   install_extension_openssh
-  install_extension_openvpn
+  install_extension_wireguard
   prepare_boot_hooks
   prepare_login_hook
 

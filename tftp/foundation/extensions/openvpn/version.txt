@@ -1,6 +1,0 @@
-http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/db.tcz
-http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/iproute2.tcz
-http://distro.ibiblio.org/tinycorelinux/10.x/x86/tcz/libpkcs11-helper.tcz
-http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/lzo.tcz
-http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/openssl.tcz
-http://distro.ibiblio.org/tinycorelinux/16.x/x86/tcz/openvpn.tcz
